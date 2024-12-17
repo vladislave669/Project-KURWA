@@ -1,0 +1,778 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-10px); }
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stat-card {
+        background: #1a1a1a;
+        border: 1px solid #DE1F1F;
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.5s ease backwards;
+    }
+    
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(222, 31, 31, 0.2);
+    }
+    
+    .stat-card .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(26, 26, 26, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card.loading .loading-overlay {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .stat-card h3 {
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover h3 {
+        transform: scale(1.05);
+    }
+    
+    .stat-card .text-success,
+    .stat-card .text-warning {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover .text-success,
+    .stat-card:hover .text-warning {
+        transform: translateX(5px);
+    }
+    
+    .chart-container {
+        height: 300px;
+        background: #1a1a1a;
+        border: 1px solid #DE1F1F;
+        border-radius: 8px;
+        padding: 1.5rem;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: slideIn 0.5s ease backwards;
+        animation-delay: 0.5s;
+    }
+    
+    .chart-container:hover {
+        box-shadow: 0 8px 15px rgba(222, 31, 31, 0.2);
+    }
+    
+    .chart-container .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(26, 26, 26, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        border-radius: 8px;
+    }
+    
+    .chart-container.loading .loading-overlay {
+        display: flex;
+    }
+    
+    .chart-error {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #DE1F1F;
+        display: none;
+        width: 80%;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .chart-container.error .chart-error {
+        display: block;
+    }
+    
+    .chart-container.error .chart-error button {
+        animation: pulse 2s infinite;
+    }
+    
+    .chart-container.error canvas {
+        opacity: 0.2;
+        transition: opacity 0.3s ease;
+    }
+    
+    .recent-movies {
+        background: #1a1a1a;
+        border: 1px solid #DE1F1F;
+        border-radius: 8px;
+        padding: 1.5rem;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.5s ease backwards;
+        animation-delay: 0.6s;
+    }
+    
+    .recent-movie-item {
+        border-bottom: 1px solid rgba(222, 31, 31, 0.2);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        margin: 4px 0;
+    }
+    
+    .recent-movie-item:last-child {
+        border-bottom: none;
+    }
+    
+    .recent-movie-item:hover {
+        background-color: rgba(222, 31, 31, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .tooltip-icon {
+        color: rgba(222, 31, 31, 0.5);
+        margin-left: 0.5rem;
+        cursor: help;
+        transition: color 0.3s ease;
+    }
+    
+    .tooltip-icon:hover {
+        color: #DE1F1F;
+    }
+    
+    .refresh-button .spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        margin-right: 0.5rem;
+    }
+    
+    .refresh-button.loading .spinner {
+        display: inline-block;
+    }
+    
+    .refresh-button.loading .fa-sync-alt {
+        display: none;
+    }
+    
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(222, 31, 31, 0.3);
+        border-radius: 50%;
+        border-top-color: #DE1F1F;
+        animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .btn-outline-danger {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-outline-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(222, 31, 31, 0.2);
+    }
+    
+    .btn-outline-danger::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(222, 31, 31, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    .btn-outline-danger:active::after {
+        width: 200%;
+        height: 200%;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .stat-card.highlight {
+        animation: pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+    }
+    
+    .stat-card.highlight::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 2px solid #DE1F1F;
+        border-radius: 8px;
+        animation: borderPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes borderPulse {
+        0% { transform: scale(1); opacity: 1; }
+        100% { transform: scale(1.1); opacity: 0; }
+    }
+    
+    .progress-bar {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(100%); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-white mb-0">Admin Dashboard</h1>
+        <div class="refresh-button">
+            <button class="btn btn-outline-danger" onclick="refreshStats()">
+                <div class="spinner"></div>
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card text-white p-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Total number of movies in the database">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">
+                            Total Movies
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                        </h6>
+                        <h3 class="mb-0" id="totalMovies">{{ stats.total_movies }}</h3>
+                    </div>
+                    <div class="text-danger">
+                        <i class="fas fa-film fa-2x"></i>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <span class="text-success">+{{ stats.new_movies_today }}</span> today
+                </small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-white p-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Total number of users in the database">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">
+                            Total Users
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                        </h6>
+                        <h3 class="mb-0" id="totalUsers">{{ stats.total_users }}</h3>
+                    </div>
+                    <div class="text-danger">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <span class="text-success">+{{ stats.new_users_today }}</span> today
+                </small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-white p-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Total number of reviews in the database">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">
+                            Total Reviews
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                        </h6>
+                        <h3 class="mb-0" id="totalReviews">{{ stats.total_reviews }}</h3>
+                    </div>
+                    <div class="text-danger">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <span class="text-warning">{{ stats.pending_reviews }}</span> pending
+                </small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-white p-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Total storage used by the database">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">
+                            Storage Used
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                        </h6>
+                        <h3 class="mb-0" id="storageUsed">{{ (stats.storage_used / (1024 * 1024 * 1024))|round(2) }} GB</h3>
+                    </div>
+                    <div class="text-danger">
+                        <i class="fas fa-hdd fa-2x"></i>
+                    </div>
+                </div>
+                <div class="progress mt-2" style="height: 4px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats.storage_percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="chart-container" data-bs-toggle="tooltip" data-bs-placement="top" title="Movie views over the last 7 days">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="chart-error">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Failed to load chart data</p>
+                    <button class="btn btn-sm btn-outline-danger" onclick="refreshStats()">Try Again</button>
+                </div>
+                <h5 class="text-white mb-3">
+                    Daily Views
+                    <i class="fas fa-info-circle tooltip-icon"></i>
+                </h5>
+                <canvas id="viewsChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container" data-bs-toggle="tooltip" data-bs-placement="top" title="Distribution of movies across categories">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="chart-error">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Failed to load chart data</p>
+                    <button class="btn btn-sm btn-outline-danger" onclick="refreshStats()">Try Again</button>
+                </div>
+                <h5 class="text-white mb-3">
+                    Categories Distribution
+                    <i class="fas fa-info-circle tooltip-icon"></i>
+                </h5>
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Movies -->
+    <div class="recent-movies">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="text-white mb-0">Recent Movies</h5>
+            <a href="{{ url_for('admin.movies') }}" class="btn btn-sm btn-outline-danger">View All</a>
+        </div>
+        {% for movie in recent_movies %}
+        <div class="recent-movie-item" data-movie-id="{{ movie.id }}">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="me-3" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px;">
+                    <div>
+                        <h6 class="text-white mb-1">{{ movie.title }}</h6>
+                        <small class="text-muted">Added {{ movie.created_at.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-danger me-2" onclick="location.href='{{ url_for('admin.edit_movie', movie_id=movie.id) }}'">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMovie({{ movie.id }})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let isRefreshing = false;
+    let refreshTimeout = null;
+
+    async function refreshStats() {
+        if (isRefreshing) return;
+        isRefreshing = true;
+
+        // Clear any pending refresh
+        if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+        }
+
+        // Show loading states with staggered animation
+        document.querySelector('.refresh-button').classList.add('loading');
+        document.querySelectorAll('.stat-card').forEach((card, index) => {
+            setTimeout(() => card.classList.add('loading'), index * 100);
+        });
+        document.querySelectorAll('.chart-container').forEach(container => {
+            container.classList.add('loading');
+            container.classList.remove('error');
+        });
+
+        try {
+            const response = await fetch('/admin/api/stats');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch stats');
+            }
+            const data = await response.json();
+            
+            // Update statistics with staggered animation
+            const stats = [
+                { id: 'totalMovies', value: data.total_movies },
+                { id: 'totalUsers', value: data.total_users },
+                { id: 'totalReviews', value: data.total_reviews }
+            ];
+            
+            stats.forEach((stat, index) => {
+                setTimeout(() => {
+                    animateNumber(stat.id, stat.value);
+                    document.getElementById(stat.id).closest('.stat-card').classList.add('highlight');
+                    setTimeout(() => {
+                        document.getElementById(stat.id).closest('.stat-card').classList.remove('highlight');
+                    }, 600);
+                }, index * 200);
+            });
+            
+            // Update storage with animation
+            const storageElement = document.getElementById('storageUsed');
+            if (storageElement) {
+                const gbUsed = (data.storage_used / (1024 * 1024 * 1024)).toFixed(2);
+                storageElement.textContent = `${gbUsed} GB`;
+                
+                // Animate progress bar
+                const progressBar = document.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    setTimeout(() => {
+                        progressBar.style.width = `${data.storage_percentage}%`;
+                    }, 100);
+                }
+            }
+            
+            // Update charts with error boundary
+            try {
+                await updateCharts(data.chart_data);
+            } catch (chartError) {
+                console.error('Chart update failed:', chartError);
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.classList.add('error');
+                });
+                throw new Error('Failed to update charts');
+            }
+            
+            // Show success toast
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+            
+            Toast.fire({
+                icon: 'success',
+                title: 'Dashboard updated successfully'
+            });
+        } catch (error) {
+            console.error('Failed to refresh stats:', error);
+            
+            // Show error toast
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true
+            });
+            
+            Toast.fire({
+                icon: 'error',
+                title: 'Failed to update dashboard',
+                text: error.message
+            });
+            
+            // Show error states
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.classList.add('error');
+            });
+        } finally {
+            // Hide loading states with staggered animation
+            document.querySelector('.refresh-button').classList.remove('loading');
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                setTimeout(() => card.classList.remove('loading'), index * 100);
+            });
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.classList.remove('loading');
+            });
+            
+            isRefreshing = false;
+            
+            // Schedule next refresh
+            refreshTimeout = setTimeout(refreshStats, 5 * 60 * 1000);
+        }
+    }
+
+    async function updateCharts(chartData) {
+        if (!chartData) throw new Error('No chart data provided');
+        
+        // Views Chart
+        const viewsCtx = document.getElementById('viewsChart').getContext('2d');
+        const viewsChart = new Chart(viewsCtx, {
+            type: 'line',
+            data: chartData.views,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(222, 31, 31, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(222, 31, 31, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Categories Chart
+        const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+        const categoriesChart = new Chart(categoriesCtx, {
+            type: 'doughnut',
+            data: chartData.categories,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                }
+            }
+        });
+        
+        return Promise.all([viewsChart, categoriesChart]);
+    }
+
+    function animateNumber(elementId, newValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const startValue = parseInt(element.textContent) || 0;
+        const duration = 1000;
+        const startTime = performance.now();
+        
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const currentValue = Math.floor(startValue + (newValue - startValue) * progress);
+            element.textContent = currentValue;
+            
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            }
+        }
+        
+        requestAnimationFrame(update);
+    }
+
+    async function deleteMovie(movieId) {
+        try {
+            const result = await Swal.fire({
+                title: 'Delete Movie?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DE1F1F',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+
+            if (result.isConfirmed) {
+                const response = await fetch(`/admin/api/movies/${movieId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to delete movie');
+                }
+                
+                if (data.success) {
+                    // Show success message
+                    await Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Movie has been deleted successfully.',
+                        icon: 'success',
+                        confirmButtonColor: '#DE1F1F',
+                        showClass: {
+                            popup: 'animate__animated animate__fadeInDown'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOutUp'
+                        }
+                    });
+                    
+                    // Refresh the dashboard
+                    await refreshStats();
+                    
+                    // Remove the movie item with animation
+                    const movieElement = document.querySelector(`[data-movie-id="${movieId}"]`);
+                    if (movieElement) {
+                        movieElement.style.animation = 'fadeOut 0.3s ease';
+                        setTimeout(() => {
+                            movieElement.remove();
+                        }, 300);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Delete failed:', error);
+            Swal.fire({
+                title: 'Error',
+                text: error.message || 'Failed to delete movie',
+                icon: 'error',
+                confirmButtonColor: '#DE1F1F',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+        }
+    }
+
+    // Initialize
+    refreshStats();
+    
+    // Auto-refresh setup with error handling
+    let autoRefreshInterval = setInterval(refreshStats, 5 * 60 * 1000);
+    
+    // Clear interval when page is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearInterval(autoRefreshInterval);
+        } else {
+            refreshStats();
+            autoRefreshInterval = setInterval(refreshStats, 5 * 60 * 1000);
+        }
+    });
+</script>
+{% endblock %}

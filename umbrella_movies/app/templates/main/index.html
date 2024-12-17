@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="container-fluid p-0">
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for featured_movie in featured_movies[:3] %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="position-relative">
+                        <img src="{{ featured_movie.banner_image }}" class="d-block w-100" alt="{{ featured_movie.title }}" style="height: 600px; object-fit: cover;">
+                        <div class="carousel-caption text-start" style="background: rgba(0,0,0,0.7); padding: 2rem;">
+                            <h1 class="display-4 text-danger">{{ featured_movie.title }}</h1>
+                            <p class="lead">{{ featured_movie.description[:200] }}...</p>
+                            <a href="{{ url_for('main.movie_detail', movie_id=featured_movie.id) }}" class="btn btn-danger btn-lg">Watch Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Releases Section -->
+<section class="latest-releases mb-5">
+    <div class="container">
+        <h2 class="section-title mb-4">Latest Releases</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for movie in latest_movies %}
+            <div class="col">
+                <div class="card movie-card h-100">
+                    <img src="{{ movie.poster_image }}" class="card-img-top" alt="{{ movie.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ movie.title }}</h5>
+                        <p class="card-text small text-muted">{{ movie.release_date.strftime('%Y') }} • {{ movie.duration }} min</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-danger">{{ movie.rating }}/10</span>
+                            <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories mb-5">
+    <div class="container">
+        <h2 class="section-title mb-4">Browse Categories</h2>
+        <div class="row g-4">
+            {% for category in categories %}
+            <div class="col-md-4">
+                <div class="category-card position-relative overflow-hidden">
+                    <img src="{{ category.image }}" class="w-100" alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
+                    <div class="category-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0,0,0,0.7);">
+                        <a href="{{ url_for('main.category', id=category.id) }}" class="text-white text-decoration-none">
+                            <h3 class="mb-0">{{ category.name }}</h3>
+                            <p class="mb-0 text-danger">{{ category.movies|length }} Movies</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Top Rated Section -->
+<section class="top-rated mb-5">
+    <div class="container">
+        <h2 class="section-title mb-4">Top Rated</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            {% for movie in top_rated_movies %}
+            <div class="col">
+                <div class="card movie-card h-100">
+                    <img src="{{ movie.poster_image }}" class="card-img-top" alt="{{ movie.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title text-truncate">{{ movie.title }}</h5>
+                        <p class="card-text small text-muted">{{ movie.release_date.strftime('%Y') }} • {{ movie.duration }} min</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-danger">{{ movie.rating }}/10</span>
+                            <a href="{{ url_for('main.movie_detail', movie_id=movie.id) }}" class="btn btn-outline-danger btn-sm">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter bg-black text-white py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="text-danger mb-4">Stay Updated</h2>
+                <p class="mb-4">Subscribe to our newsletter for the latest movies and exclusive content.</p>
+                <form class="row g-3 justify-content-center">
+                    <div class="col-auto flex-grow-1">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-danger">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .section-title {
+        color: var(--umbrella-dark);
+        border-left: 4px solid var(--umbrella-red);
+        padding-left: 1rem;
+    }
+    
+    .category-card {
+        transition: transform 0.3s ease;
+    }
+    
+    .category-card:hover {
+        transform: scale(1.05);
+    }
+    
+    .category-overlay {
+        transition: background 0.3s ease;
+    }
+    
+    .category-overlay:hover {
+        background: rgba(222, 31, 31, 0.8) !important;
+    }
+</style>
+{% endblock %}

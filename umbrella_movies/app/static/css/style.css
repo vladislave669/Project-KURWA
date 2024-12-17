@@ -1,0 +1,150 @@
+/* Umbrella Corporation Theme Colors */
+:root {
+    --umbrella-red: #DE1F1F;
+    --umbrella-dark: #000000;
+    --umbrella-light: #FFFFFF;
+    --umbrella-gray: #333333;
+}
+
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+}
+
+/* Navigation Styles */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    transition: color 0.3s ease;
+}
+
+.hover-danger:hover {
+    color: var(--umbrella-red) !important;
+}
+
+/* Button Styles */
+.btn-danger {
+    background-color: var(--umbrella-red);
+    border-color: var(--umbrella-red);
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #b81818;
+    border-color: #b81818;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: var(--umbrella-red);
+    box-shadow: 0 0 0 0.2rem rgba(222, 31, 31, 0.25);
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Movie Grid Styles */
+.movie-card {
+    height: 100%;
+    background: var(--umbrella-light);
+}
+
+.movie-card img {
+    object-fit: cover;
+    height: 300px;
+    width: 100%;
+}
+
+/* Footer Styles */
+footer {
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.social-links a {
+    transition: color 0.3s ease;
+    font-size: 1.2rem;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 0;
+    margin: 0;
+}
+
+.alert-danger {
+    background-color: var(--umbrella-red);
+    border-color: var(--umbrella-red);
+    color: var(--umbrella-light);
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+    border-radius: 0;
+    margin-top: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    transition: all 0.3s ease;
+}
+
+/* Search Bar Styles */
+.input-group .form-control {
+    border-right: none;
+}
+
+.input-group .btn {
+    border-left: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .movie-card img {
+        height: 250px;
+    }
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--umbrella-light);
+    border-top: 4px solid var(--umbrella-red);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

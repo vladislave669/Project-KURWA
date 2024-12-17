@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper bg-black min-vh-100 d-flex align-items-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="card border-danger">
+                    <div class="card-body p-5">
+                        <!-- Logo -->
+                        <div class="text-center mb-4">
+                            <img src="{{ url_for('static', filename='images/umbrella-logo.png') }}" alt="Umbrella Movies" height="60">
+                            <h2 class="mt-3 text-danger">Welcome Back</h2>
+                            <p class="text-muted">Sign in to continue to Umbrella Movies</p>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form method="POST" action="{{ url_for('auth.login') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Email Address</label>
+                                {{ form.email(class="form-control form-control-lg", placeholder="Enter your email") }}
+                                {% if form.email.errors %}
+                                    {% for error in form.email.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between">
+                                    <label class="form-label">Password</label>
+                                    <a href="{{ url_for('auth.reset_password_request') }}" class="text-danger text-decoration-none">Forgot Password?</a>
+                                </div>
+                                {{ form.password(class="form-control form-control-lg", placeholder="Enter your password") }}
+                                {% if form.password.errors %}
+                                    {% for error in form.password.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    {{ form.remember_me(class="form-check-input") }}
+                                    <label class="form-check-label">Remember me</label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg">Sign In</button>
+                            </div>
+                        </form>
+
+                        <!-- Social Login -->
+                        <div class="mt-4">
+                            <div class="text-center mb-3">
+                                <span class="bg-white px-2 text-muted">or sign in with</span>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-dark">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                                <button class="btn btn-outline-dark">
+                                    <i class="fab fa-facebook me-2"></i>Facebook
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Register Link -->
+                        <div class="text-center mt-4">
+                            <p class="mb-0">Don't have an account? 
+                                <a href="{{ url_for('auth.register') }}" class="text-danger text-decoration-none">Sign Up</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        margin-top: -2rem;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    }
+    
+    .card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 40px rgba(222, 31, 31, 0.1);
+    }
+    
+    .form-control {
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--umbrella-red);
+        box-shadow: 0 0 0 0.2rem rgba(222, 31, 31, 0.25);
+    }
+    
+    .btn-outline-dark:hover {
+        background-color: var(--umbrella-red);
+        border-color: var(--umbrella-red);
+    }
+</style>
+{% endblock %}

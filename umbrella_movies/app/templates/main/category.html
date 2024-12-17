@@ -1,0 +1,208 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - Umbrella Movies{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #DE1F1F;
+    }
+
+    .movie-card {
+        background: #1a1a1a;
+        border: 1px solid #DE1F1F;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        position: relative;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(222, 31, 31, 0.2);
+    }
+
+    .movie-poster {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 2/3;
+    }
+
+    .movie-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .movie-card:hover .movie-poster img {
+        transform: scale(1.05);
+    }
+
+    .movie-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .movie-card:hover .movie-overlay {
+        opacity: 1;
+    }
+
+    .movie-info {
+        padding: 1rem;
+    }
+
+    .movie-title {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-meta {
+        color: #666;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rating {
+        color: #DE1F1F;
+    }
+
+    .movie-year {
+        color: #666;
+    }
+
+    .pagination {
+        margin-top: 2rem;
+    }
+
+    .page-link {
+        background-color: #1a1a1a;
+        border-color: #DE1F1F;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background-color: #DE1F1F;
+        border-color: #DE1F1F;
+        color: #fff;
+    }
+
+    .page-item.active .page-link {
+        background-color: #DE1F1F;
+        border-color: #DE1F1F;
+    }
+
+    .no-movies {
+        background: #1a1a1a;
+        border: 1px solid #DE1F1F;
+        border-radius: 8px;
+        padding: 3rem;
+        text-align: center;
+        margin: 2rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="category-header">
+    <div class="container">
+        <h1 class="text-white mb-2">{{ category.name }}</h1>
+        <p class="text-muted mb-0">{{ movies|length }} movies in this category</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if movies %}
+    <div class="row g-4">
+        {% for movie in movies %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="movie-card">
+                <div class="movie-poster">
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+                    <div class="movie-overlay">
+                        <a href="{{ url_for('main.movie', movie_id=movie.id) }}" class="btn btn-outline-danger">
+                            <i class="fas fa-play me-2"></i>Watch Now
+                        </a>
+                    </div>
+                </div>
+                <div class="movie-info">
+                    <h5 class="movie-title" title="{{ movie.title }}">{{ movie.title }}</h5>
+                    <div class="movie-meta">
+                        <div class="rating">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(movie.rating|float) }}
+                        </div>
+                        <div class="movie-year">{{ movie.release_year }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Movie navigation" class="d-flex justify-content-center">
+        <ul class="pagination">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('main.category', category_id=category.id, page=pagination.prev_num) }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page in pagination.iter_pages() %}
+                {% if page %}
+                    <li class="page-item {{ 'active' if page == pagination.page else '' }}">
+                        <a class="page-link" href="{{ url_for('main.category', category_id=category.id, page=page) }}">{{ page }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('main.category', category_id=category.id, page=pagination.next_num) }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="no-movies">
+        <i class="fas fa-film fa-3x text-danger mb-3"></i>
+        <h3 class="text-white">No Movies Found</h3>
+        <p class="text-muted mb-4">There are currently no movies in this category.</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-danger">
+            <i class="fas fa-home me-2"></i>Return to Home
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

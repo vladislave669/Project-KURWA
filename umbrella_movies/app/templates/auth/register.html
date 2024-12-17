@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper bg-black min-vh-100 d-flex align-items-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card border-danger">
+                    <div class="card-body p-5">
+                        <!-- Logo -->
+                        <div class="text-center mb-4">
+                            <img src="{{ url_for('static', filename='images/umbrella-logo.png') }}" alt="Umbrella Movies" height="60">
+                            <h2 class="mt-3 text-danger">Create Account</h2>
+                            <p class="text-muted">Join the Umbrella Movies community</p>
+                        </div>
+
+                        <!-- Register Form -->
+                        <form method="POST" action="{{ url_for('auth.register') }}">
+                            {{ form.hidden_tag() }}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">First Name</label>
+                                    {{ form.first_name(class="form-control form-control-lg", placeholder="Enter first name") }}
+                                    {% if form.first_name.errors %}
+                                        {% for error in form.first_name.errors %}
+                                            <span class="text-danger">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Last Name</label>
+                                    {{ form.last_name(class="form-control form-control-lg", placeholder="Enter last name") }}
+                                    {% if form.last_name.errors %}
+                                        {% for error in form.last_name.errors %}
+                                            <span class="text-danger">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Username</label>
+                                {{ form.username(class="form-control form-control-lg", placeholder="Choose a username") }}
+                                {% if form.username.errors %}
+                                    {% for error in form.username.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Email Address</label>
+                                {{ form.email(class="form-control form-control-lg", placeholder="Enter your email") }}
+                                {% if form.email.errors %}
+                                    {% for error in form.email.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Password</label>
+                                {{ form.password(class="form-control form-control-lg", placeholder="Create a password") }}
+                                {% if form.password.errors %}
+                                    {% for error in form.password.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                                <div class="form-text">
+                                    Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Confirm Password</label>
+                                {{ form.confirm_password(class="form-control form-control-lg", placeholder="Confirm your password") }}
+                                {% if form.confirm_password.errors %}
+                                    {% for error in form.confirm_password.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    {{ form.accept_tos(class="form-check-input") }}
+                                    <label class="form-check-label">
+                                        I agree to the <a href="#" class="text-danger">Terms of Service</a> and <a href="#" class="text-danger">Privacy Policy</a>
+                                    </label>
+                                    {% if form.accept_tos.errors %}
+                                        {% for error in form.accept_tos.errors %}
+                                            <span class="text-danger d-block">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger btn-lg">Create Account</button>
+                            </div>
+                        </form>
+
+                        <!-- Social Register -->
+                        <div class="mt-4">
+                            <div class="text-center mb-3">
+                                <span class="bg-white px-2 text-muted">or register with</span>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-dark">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                                <button class="btn btn-outline-dark">
+                                    <i class="fab fa-facebook me-2"></i>Facebook
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Login Link -->
+                        <div class="text-center mt-4">
+                            <p class="mb-0">Already have an account? 
+                                <a href="{{ url_for('auth.login') }}" class="text-danger text-decoration-none">Sign In</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        margin-top: -2rem;
+        background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    }
+    
+    .card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 40px rgba(222, 31, 31, 0.1);
+    }
+    
+    .form-control {
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--umbrella-red);
+        box-shadow: 0 0 0 0.2rem rgba(222, 31, 31, 0.25);
+    }
+    
+    .btn-outline-dark:hover {
+        background-color: var(--umbrella-red);
+        border-color: var(--umbrella-red);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}

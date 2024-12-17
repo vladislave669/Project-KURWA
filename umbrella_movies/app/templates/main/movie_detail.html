@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }}{% endblock %}
+
+{% block content %}
+<!-- Movie Hero Section -->
+<section class="movie-hero position-relative mb-5">
+    <div class="movie-backdrop position-absolute w-100" style="height: 500px; overflow: hidden;">
+        <img src="{{ movie.backdrop_image }}" class="w-100 h-100" style="object-fit: cover; filter: blur(5px);" alt="{{ movie.title }} backdrop">
+        <div class="overlay position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);"></div>
+    </div>
+    
+    <div class="container position-relative" style="padding-top: 60px;">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="movie-poster">
+                    <img src="{{ movie.poster_image }}" class="w-100 rounded shadow" style="max-height: 500px; object-fit: cover;" alt="{{ movie.title }} poster">
+                </div>
+            </div>
+            <div class="col-md-8 text-white">
+                <h1 class="display-4 mb-3">{{ movie.title }}</h1>
+                <div class="movie-meta mb-4">
+                    <span class="badge bg-danger me-2">{{ movie.rating }}/10</span>
+                    <span class="me-3">{{ movie.release_date.strftime('%Y') }}</span>
+                    <span class="me-3">{{ movie.duration }} min</span>
+                    <span>{{ movie.category.name }}</span>
+                </div>
+                <p class="lead mb-4">{{ movie.description }}</p>
+                <div class="movie-details mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong class="text-danger">Director:</strong> {{ movie.director }}</p>
+                            <p><strong class="text-danger">Cast:</strong> {{ movie.cast }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong class="text-danger">Language:</strong> {{ movie.language }}</p>
+                            <p><strong class="text-danger">Country:</strong> {{ movie.country }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="movie-actions">
+                    <button class="btn btn-danger btn-lg me-3">
+                        <i class="fas fa-play me-2"></i>Watch Now
+                    </button>
+                    <button class="btn btn-outline-light btn-lg me-3">
+                        <i class="fas fa-plus me-2"></i>Add to Watchlist
+                    </button>
+                    <button class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-share me-2"></i>Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Movie Content Section -->
+<section class="movie-content mb-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Trailer -->
+                <div class="movie-trailer mb-5">
+                    <h2 class="section-title mb-4">Trailer</h2>
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ movie.trailer_url }}" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <!-- Reviews -->
+                <div class="movie-reviews mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="section-title mb-0">Reviews</h2>
+                        {% if current_user.is_authenticated %}
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                            <i class="fas fa-edit me-2"></i>Write Review
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    {% for review in movie.reviews %}
+                    <div class="review-card bg-light p-4 rounded mb-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ review.user.avatar }}" class="rounded-circle me-3" width="40" height="40" alt="{{ review.user.username }}">
+                                <div>
+                                    <h5 class="mb-0">{{ review.user.username }}</h5>
+                                    <small class="text-muted">{{ review.created_at.strftime('%B %d, %Y') }}</small>
+                                </div>
+                            </div>
+                            <div class="rating">
+                                {% for i in range(review.rating) %}
+                                <i class="fas fa-star text-danger"></i>
+                                {% endfor %}
+                                {% for i in range(5 - review.rating) %}
+                                <i class="far fa-star text-danger"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="mb-0">{{ review.content }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Similar Movies -->
+                <div class="similar-movies">
+                    <h2 class="section-title mb-4">Similar Movies</h2>
+                    {% for similar in similar_movies %}
+                    <div class="card movie-card mb-3">
+                        <div class="row g-0">
+                            <div class="col-4">
+                                <img src="{{ similar.poster_image }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ similar.title }}">
+                            </div>
+                            <div class="col-8">
+                                <div class="card-body">
+                                    <h5 class="card-title text-truncate">{{ similar.title }}</h5>
+                                    <p class="card-text small text-muted">{{ similar.release_date.strftime('%Y') }}</p>
+                                    <a href="{{ url_for('main.movie_detail', movie_id=similar.id) }}" class="btn btn-outline-danger btn-sm">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Review Modal -->
+{% if current_user.is_authenticated %}
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Write a Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('main.add_review', movie_id=movie.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Rating</label>
+                        <div class="rating-input">
+                            {% for i in range(5) %}
+                            <input type="radio" name="rating" value="{{ i + 1 }}" id="star{{ i + 1 }}" required>
+                            <label for="star{{ i + 1 }}"><i class="far fa-star"></i></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Review</label>
+                        <textarea class="form-control" name="content" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie-hero {
+        margin-top: -2rem;
+        padding-bottom: 2rem;
+    }
+    
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    
+    .rating-input input {
+        display: none;
+    }
+    
+    .rating-input label {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #ddd;
+        margin: 0 2px;
+    }
+    
+    .rating-input label:hover,
+    .rating-input label:hover ~ label,
+    .rating-input input:checked ~ label {
+        color: var(--umbrella-red);
+    }
+    
+    .rating-input label:hover i,
+    .rating-input label:hover ~ label i,
+    .rating-input input:checked ~ label i {
+        content: "\f005";
+        font-weight: 900;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize star rating system
+    const ratingLabels = document.querySelectorAll('.rating-input label');
+    ratingLabels.forEach(label => {
+        label.addEventListener('mouseover', function() {
+            this.querySelector('i').classList.remove('far');
+            this.querySelector('i').classList.add('fas');
+        });
+        
+        label.addEventListener('mouseout', function() {
+            if (!this.previousElementSibling.checked) {
+                this.querySelector('i').classList.remove('fas');
+                this.querySelector('i').classList.add('far');
+            }
+        });
+        
+        label.addEventListener('click', function() {
+            const radio = this.previousElementSibling;
+            radio.checked = true;
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper py-5">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="card border-danger mb-4">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <div class="position-relative">
+                            <img src="{{ current_user.avatar_url or url_for('static', filename='img/default-avatar.png') }}" 
+                                 class="rounded-circle" width="100" height="100" alt="Profile Picture">
+                            <button class="btn btn-sm btn-danger position-absolute bottom-0 end-0" 
+                                    data-bs-toggle="modal" data-bs-target="#avatarModal">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h2 class="mb-1">{{ current_user.username }}</h2>
+                        <p class="text-muted mb-2">Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+                        <div class="d-flex gap-3">
+                            <span><i class="fas fa-film text-danger me-1"></i> {{ watchlist|length }} in watchlist</span>
+                            <span><i class="fas fa-star text-danger me-1"></i> {{ reviews|length }} reviews</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Sidebar - Navigation -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-danger">
+                    <div class="list-group list-group-flush">
+                        <a href="#profile" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                            <i class="fas fa-user me-2"></i>Profile Information
+                        </a>
+                        <a href="#watchlist" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-film me-2"></i>My Watchlist
+                            <span class="badge bg-danger rounded-pill float-end">{{ watchlist|length }}</span>
+                        </a>
+                        <a href="#reviews" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-star me-2"></i>My Reviews
+                            <span class="badge bg-danger rounded-pill float-end">{{ reviews|length }}</span>
+                        </a>
+                        <a href="#settings" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-cog me-2"></i>Account Settings
+                        </a>
+                        <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-shield-alt me-2"></i>Security
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content Area -->
+            <div class="col-lg-9">
+                <div class="tab-content">
+                    <!-- Profile Information Tab -->
+                    <div class="tab-pane fade show active" id="profile">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="card-title mb-0">Profile Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm" class="needs-validation" novalidate>
+                                    <div class="mb-3">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" class="form-control" name="username" 
+                                               value="{{ current_user.username }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="email" 
+                                               value="{{ current_user.email }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Bio</label>
+                                        <textarea class="form-control" name="bio" rows="3">{{ current_user.bio }}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-save me-1"></i>Save Changes
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Watchlist Tab -->
+                    <div class="tab-pane fade" id="watchlist">
+                        <!-- Watchlist content here -->
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews">
+                        <!-- Reviews content here -->
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-pane fade" id="settings">
+                        <!-- Settings content here -->
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="tab-pane fade" id="security">
+                        <!-- Security content here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Avatar Upload Modal -->
+<div class="modal fade" id="avatarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="avatarForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label">Choose Image</label>
+                        <input type="file" class="form-control" name="avatar" accept="image/*" required>
+                        <div class="invalid-feedback">Please select an image file.</div>
+                    </div>
+                    <div class="mb-3">
+                        <img id="avatar-preview" class="d-none rounded" style="max-width: 100%; height: auto;">
+                    </div>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-upload me-1"></i>Upload
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .profile-wrapper {
+        background: #f8f9fa;
+        margin-top: -1rem;
+        min-height: calc(100vh - 56px);
+    }
+    .list-group-item {
+        border: none;
+        padding: 1rem 1.5rem;
+        transition: all 0.2s ease;
+    }
+    .list-group-item.active {
+        background-color: #DE1F1F;
+        border-color: #DE1F1F;
+    }
+    .list-group-item:hover:not(.active) {
+        background-color: rgba(222, 31, 31, 0.05);
+    }
+    .card {
+        border-color: #DE1F1F;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .btn-danger {
+        background-color: #DE1F1F;
+        border-color: #DE1F1F;
+    }
+    .btn-outline-danger {
+        color: #DE1F1F;
+        border-color: #DE1F1F;
+    }
+    .btn-outline-danger:hover {
+        background-color: #DE1F1F;
+        border-color: #DE1F1F;
+    }
+    .text-danger {
+        color: #DE1F1F !important;
+    }
+    .bg-danger {
+        background-color: #DE1F1F !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // CSRF token setup
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+    
+    // Form handling function
+    async function handleFormSubmit(form, url, successMessage) {
+        try {
+            const formData = new FormData(form);
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            await Swal.fire({
+                title: 'Success!',
+                text: successMessage,
+                icon: 'success',
+                confirmButtonColor: '#DE1F1F'
+            });
+            
+            location.reload();
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: error.message,
+                icon: 'error',
+                confirmButtonColor: '#DE1F1F'
+            });
+        }
+    }
+    
+    // Profile update form
+    document.getElementById('profileForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmit(this, '/profile/update', 'Profile updated successfully!');
+    });
+    
+    // Avatar upload form
+    document.getElementById('avatarForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmit(this, '/profile/avatar/update', 'Avatar updated successfully!');
+    });
+    
+    // Avatar preview
+    document.querySelector('input[name="avatar"]')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('avatar-preview');
+        
+        if (!file) {
+            preview.classList.add('d-none');
+            return;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Please select an image file',
+                icon: 'error',
+                confirmButtonColor: '#DE1F1F'
+            });
+            this.value = '';
+            preview.classList.add('d-none');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+        }
+        reader.readAsDataURL(file);
+    });
+    
+    // Tab persistence
+    document.addEventListener('DOMContentLoaded', () => {
+        const hash = window.location.hash || '#profile';
+        const tab = document.querySelector(`[href="${hash}"]`);
+        if (tab) {
+            tab.click();
+        }
+    });
+    
+    // Image error handling
+    document.querySelectorAll('img').forEach(img => {
+        img.addEventListener('error', function() {
+            this.src = "{{ url_for('static', filename='img/default-avatar.png') }}";
+        });
+    });
+</script>
+{% endblock %}
