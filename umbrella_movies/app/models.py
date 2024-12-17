@@ -7,17 +7,7 @@ import jwt
 from time import time
 from flask import current_app
 from sqlalchemy import Index, event
-
-# Add indexes for frequently queried columns
-Index('idx_movie_created_at', Movie.created_at)
-Index('idx_movie_category', Movie.category_id)
-Index('idx_review_movie', Review.movie_id)
-Index('idx_review_user', Review.user_id)
-Index('idx_rating_movie', Rating.movie_id)
-Index('idx_rating_user', Rating.user_id)
-Index('idx_movieview_movie', MovieView.movie_id)
-Index('idx_movieview_user', MovieView.user_id)
-Index('idx_movieview_date', MovieView.viewed_at)
+import os
 
 # Cache invalidation on model changes
 @event.listens_for(Movie, 'after_update')
@@ -142,6 +132,42 @@ class MovieView(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Nullable for anonymous views
     ip_address = db.Column(db.String(45))  # Support IPv6
     viewed_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    movie = db.relationship('Movie', backref=db.backref('views', lazy='dynamic'))
-    user = db.relationship('User', backref=db.backref('movie_views', lazy='dynamic'))
+
+# Cache functions
+@cache.memoize(timeout=300)
+def get_daily_views_data():
+    """Get movie view statistics for the last 7 days"""
+    from datetime import datetime, timedelta
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    views = MovieView.query.filter(MovieView.viewed_at >= seven_days_ago).all()
+    return views
+
+@cache.memoize(timeout=300)
+def calculate_storage_usage():
+    """Calculate total storage usage of movie files"""
+    movies = Movie.query.all()
+    total_size = 0
+    for movie in movies:
+        if movie.poster_url and movie.poster_url.startswith('/'):
+            try:
+                total_size += os.path.getsize(movie.poster_url[1:])
+            except OSError:
+                pass
+    return total_size
+
+@cache.memoize(timeout=300)
+def get_categories_data():
+    """Get all categories with their movie counts"""
+    categories = Category.query.all()
+    return [(cat, cat.movies.count()) for cat in categories]
+
+# Add indexes for frequently queried columns
+Index('idx_movie_created_at', Movie.created_at)
+Index('idx_movie_category', Movie.category_id)
+Index('idx_review_movie', Review.movie_id)
+Index('idx_review_user', Review.user_id)
+Index('idx_rating_movie', Rating.movie_id)
+Index('idx_rating_user', Rating.user_id)
+Index('idx_movieview_movie', MovieView.movie_id)
+Index('idx_movieview_user', MovieView.user_id)
+Index('idx_movieview_date', MovieView.viewed_at)
