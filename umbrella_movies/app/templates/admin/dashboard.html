@@ -33,7 +33,7 @@
     
     .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(222, 31, 31, 0.2);
+        box-shadow: 0 8px 15px #de1f1f33;
     }
     
     .stat-card .loading-overlay {
@@ -294,14 +294,153 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container-fluid py-4">
+    <h2 class="text-white mb-4">Admin Dashboard</h2>
+
+    <!-- Security Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark text-white border-danger mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-danger">Failed Login Attempts</h6>
+                            <h3 class="mb-0" id="failedLoginCount">0</h3>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="fas fa-shield-alt text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-2">Last 24 hours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark text-white border-danger mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-danger">Locked Accounts</h6>
+                            <h3 class="mb-0" id="lockedAccountCount">0</h3>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="fas fa-lock text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-2">Currently locked</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark text-white border-danger mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-danger">Active Sessions</h6>
+                            <h3 class="mb-0" id="activeSessionCount">0</h3>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="fas fa-users text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-2">Currently online</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark text-white border-danger mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-danger">Suspicious Activities</h6>
+                            <h3 class="mb-0" id="suspiciousActivityCount">0</h3>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="fas fa-exclamation-triangle text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-2">Last 24 hours</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Alerts -->
+    <div class="card bg-dark text-white border-danger mb-4">
+        <div class="card-header bg-black border-danger d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Security Alerts</h5>
+            <div>
+                <button class="btn btn-sm btn-outline-danger me-2" onclick="refreshSecurityAlerts()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="clearAllAlerts()">
+                    Clear All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="securityAlerts">
+                <!-- Alerts will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="card bg-dark text-white border-danger mb-4">
+        <div class="card-header bg-black border-danger">
+            <h5 class="mb-0">System Health</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h6 class="text-danger">Database Status</h6>
+                        <div class="progress bg-black">
+                            <div id="dbHealth" class="progress-bar bg-success" style="width: 100%">
+                                Healthy
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="text-danger">Storage Usage</h6>
+                        <div class="progress bg-black">
+                            <div id="storageUsage" class="progress-bar bg-warning" style="width: 75%">
+                                75%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <h6 class="text-danger">Cache Status</h6>
+                        <div class="progress bg-black">
+                            <div id="cacheHealth" class="progress-bar bg-success" style="width: 100%">
+                                Operational
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="text-danger">API Response Time</h6>
+                        <div class="progress bg-black">
+                            <div id="apiHealth" class="progress-bar bg-success" style="width: 90%">
+                                90ms
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="text-white mb-0">Admin Dashboard</h1>
-        <div class="refresh-button">
+        <div class="d-flex gap-3">
             <button class="btn btn-outline-danger" onclick="refreshStats()">
-                <div class="spinner"></div>
-                <i class="fas fa-sync-alt"></i> Refresh Data
+                <i class="fas fa-sync-alt"></i> Refresh Stats
+            </button>
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#uploadMovieModal">
+                <i class="fas fa-plus"></i> Upload Movie
             </button>
         </div>
     </div>
@@ -392,7 +531,7 @@
                     </div>
                 </div>
                 <div class="progress mt-2" style="height: 4px;">
-                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats.storage_percentage }}%"></div>
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats.storage_percentage if stats and stats.storage_percentage is not none else 0 }}%"></div>
                 </div>
             </div>
         </div>
@@ -453,7 +592,7 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
-                    <button class="btn btn-sm btn-outline-danger me-2" onclick="location.href='{{ url_for('admin.edit_movie', movie_id=movie.id) }}'">
+                    <button class="btn btn-sm btn-outline-danger me-2" onclick="location.href='{{ url_for('admin.edit_movie', movie_id=movie.id) }}';">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteMovie({{ movie.id }})">
@@ -463,6 +602,66 @@
             </div>
         </div>
         {% endfor %}
+    </div>
+</div>
+
+<!-- Upload Movie Modal -->
+<div class="modal fade" id="uploadMovieModal" tabindex="-1" aria-labelledby="uploadMovieModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title" id="uploadMovieModalLabel">Upload New Movie</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadMovieForm" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control bg-dark text-white" id="title" name="title" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="release_year" class="form-label">Release Year</label>
+                            <input type="number" class="form-control bg-dark text-white" id="release_year" name="release_year" min="1900" max="2100" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="duration" class="form-label">Duration (min)</label>
+                            <input type="number" class="form-control bg-dark text-white" id="duration" name="duration" min="1" max="600" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control bg-dark text-white" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select bg-dark text-white" id="category_id" name="category_id" required>
+                                <!-- Categories will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="trailer_url" class="form-label">Trailer URL (optional)</label>
+                            <input type="url" class="form-control bg-dark text-white" id="trailer_url" name="trailer_url">
+                        </div>
+                        <div class="col-12">
+                            <label for="poster" class="form-label">Movie Poster</label>
+                            <input type="file" class="form-control bg-dark text-white" id="poster" name="poster" accept="image/*" required>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_featured" name="is_featured">
+                                <label class="form-check-label" for="is_featured">
+                                    Featured Movie
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-danger">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="uploadMovie()">Upload Movie</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -543,7 +742,7 @@
                 if (progressBar) {
                     progressBar.style.width = '0%';
                     setTimeout(() => {
-                        progressBar.style.width = `${data.storage_percentage}%`;
+                        progressBar.style.width = `${data.storage_percentage || 0}%`;
                     }, 100);
                 }
             }
@@ -770,20 +969,150 @@
         }
     }
 
-    // Initialize
-    refreshStats();
+    async function uploadMovie() {
+        const form = document.getElementById('uploadMovieForm');
+        const formData = new FormData(form);
+        
+        try {
+            const response = await fetch('/admin/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                showSuccess('Movie uploaded successfully!');
+                $('#uploadMovieModal').modal('hide');
+                form.reset();
+                refreshStats();
+            } else {
+                showError(data.error || 'Failed to upload movie');
+            }
+        } catch (error) {
+            showError('An error occurred while uploading the movie');
+        }
+    }
     
-    // Auto-refresh setup with error handling
-    let autoRefreshInterval = setInterval(refreshStats, 5 * 60 * 1000);
-    
-    // Clear interval when page is hidden
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            clearInterval(autoRefreshInterval);
-        } else {
-            refreshStats();
-            autoRefreshInterval = setInterval(refreshStats, 5 * 60 * 1000);
+    // Load categories when modal opens
+    $('#uploadMovieModal').on('show.bs.modal', async function () {
+        try {
+            const response = await fetch('/api/categories');
+            const categories = await response.json();
+            
+            const select = document.getElementById('category_id');
+            select.innerHTML = categories.map(cat => 
+                `<option value="${cat.id}">${cat.name}</option>`
+            ).join('');
+        } catch (error) {
+            showError('Failed to load categories');
         }
     });
+
+    // Security Overview Functions
+    async function refreshSecurityOverview() {
+        try {
+            const response = await fetch('/admin/security-overview');
+            const data = await response.json();
+            
+            document.getElementById('failedLoginCount').textContent = data.failed_logins;
+            document.getElementById('lockedAccountCount').textContent = data.locked_accounts;
+            document.getElementById('activeSessionCount').textContent = data.active_sessions;
+            document.getElementById('suspiciousActivityCount').textContent = data.suspicious_activities;
+            
+            updateSystemHealth(data.system_health);
+            updateSecurityAlerts(data.alerts);
+        } catch (error) {
+            showError('Failed to load security overview');
+        }
+    }
+
+    function updateSystemHealth(health) {
+        // Update Database Health
+        const dbHealth = document.getElementById('dbHealth');
+        dbHealth.style.width = health.database.status + '%';
+        dbHealth.className = `progress-bar bg-${getHealthClass(health.database.status)}`;
+        dbHealth.textContent = health.database.message;
+
+        // Update Storage Usage
+        const storageUsage = document.getElementById('storageUsage');
+        storageUsage.style.width = health.storage.usage + '%';
+        storageUsage.className = `progress-bar bg-${getHealthClass(100 - health.storage.usage)}`;
+        storageUsage.textContent = health.storage.usage + '%';
+
+        // Update Cache Health
+        const cacheHealth = document.getElementById('cacheHealth');
+        cacheHealth.style.width = health.cache.status + '%';
+        cacheHealth.className = `progress-bar bg-${getHealthClass(health.cache.status)}`;
+        cacheHealth.textContent = health.cache.message;
+
+        // Update API Health
+        const apiHealth = document.getElementById('apiHealth');
+        apiHealth.style.width = health.api.status + '%';
+        apiHealth.className = `progress-bar bg-${getHealthClass(health.api.status)}`;
+        apiHealth.textContent = health.api.response_time + 'ms';
+    }
+
+    function getHealthClass(value) {
+        if (value >= 90) return 'success';
+        if (value >= 70) return 'warning';
+        return 'danger';
+    }
+
+    function updateSecurityAlerts(alerts) {
+        const alertsContainer = document.getElementById('securityAlerts');
+        alertsContainer.innerHTML = alerts.length ? alerts.map(alert => `
+            <div class="alert alert-${alert.level} bg-opacity-10 border-${alert.level} mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="alert-heading text-${alert.level}">${alert.title}</h6>
+                        <p class="mb-0">${alert.message}</p>
+                        <small class="text-muted">${new Date(alert.timestamp).toLocaleString()}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-${alert.level}" onclick="dismissAlert(${alert.id})">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        `).join('') : '<p class="text-muted mb-0">No security alerts</p>';
+    }
+
+    async function dismissAlert(alertId) {
+        try {
+            const response = await fetch(`/admin/security-alert/${alertId}/dismiss`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error);
+            }
+            
+            refreshSecurityOverview();
+        } catch (error) {
+            showError('Failed to dismiss alert');
+        }
+    }
+
+    async function clearAllAlerts() {
+        try {
+            const response = await fetch('/admin/security-alerts/clear', {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error);
+            }
+            
+            refreshSecurityOverview();
+        } catch (error) {
+            showError('Failed to clear alerts');
+        }
+    }
+
+    // Refresh security overview every 30 seconds
+    refreshSecurityOverview();
+    setInterval(refreshSecurityOverview, 30000);
 </script>
 {% endblock %}
