@@ -1,0 +1,56 @@
+# Core Flask Ecosystem
+Flask==2.3.2
+Flask-Login==0.6.2
+Flask-SQLAlchemy==3.0.3
+Flask-Migrate==4.0.4
+Flask-WTF==1.1.1
+Flask-Bcrypt==1.0.1
+Flask-Cors==3.0.10
+
+# Database
+SQLAlchemy==2.0.12
+psycopg2-binary==2.9.6
+python-dotenv==1.0.0
+
+# Authentication & Security
+itsdangerous==2.1.2
+email-validator==2.0.0
+passlib==1.7.4
+
+# Image and File Handling
+Pillow==9.5.0
+python-magic==0.4.27
+
+# Background Tasks
+celery==5.2.7
+redis==4.5.4
+
+# API and Serialization
+marshmallow==3.19.0
+marshmallow-sqlalchemy==0.28.1
+
+# Machine Learning and AI
+scikit-learn==1.2.2
+numpy==1.24.3
+pandas==2.0.1
+
+# Monitoring and Logging
+blinker==1.6.2
+sentry-sdk==1.22.2
+
+# Production WSGI Server
+gunicorn==20.1.0
+
+# Development and Testing
+pytest==7.3.1
+coverage==7.2.5
+black==23.3.0
+flake8==6.0.0
+
+# Frontend Dependencies
+Bootstrap==5.2.3
+Font-Awesome==6.4.0
+
+# Misc Utilities
+python-dateutil==2.8.2
+pytz==2023.3
